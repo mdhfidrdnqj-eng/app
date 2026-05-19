@@ -1,0 +1,20 @@
+RewriteEngine On
+RewriteBase /
+
+# منع الوصول المباشر للمجلدات
+Options -Indexes
+
+# إعدادات الأمان
+<FilesMatch "\.(php|inc)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# السماح بالوصول إلى API فقط
+<FilesMatch "^(api/.*\.php)$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>
+
+# ضبط نوع المحتوى
+AddDefaultCharset UTF-8

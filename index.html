@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VaultX — GCOIN Wallet</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="loading">
+    <div class="logo-text">GCOIN</div>
+    <div class="loader-ring"></div>
+    <div style="font-size:0.8rem;color:var(--text3)">جاري التحميل...</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div id="app" style="display:none">
+    <!-- الهيدر -->
+    <header class="header">
+        <div class="header-logo">GCOIN</div>
+        <div class="header-user">
+            <div>
+                <div class="user-name" id="hdr-name">مستخدم</div>
+                <div class="user-role" id="hdr-role">عضو</div>
+            </div>
+            <div class="avatar" id="hdr-avatar">م</div>
+        </div>
+    </header>
+
+    <!-- التنقل -->
+    <nav class="nav">
+        <button class="nav-btn active" data-page="home">🏠 الرئيسية</button>
+        <button class="nav-btn" data-page="market">📊 السوق</button>
+        <button class="nav-btn" data-page="wallet">💰 محفظتي</button>
+        <button class="nav-btn" data-page="history">📜 السجل</button>
+        <button class="nav-btn" data-page="deposit">💳 شحن</button>
+        <button class="nav-btn" data-page="admin" id="adminNavBtn" style="display:none">⚙️ الإدارة</button>
+    </nav>
+
+    <!-- الصفحات -->
+    <div id="page-home" class="page active"></div>
+    <div id="page-market" class="page"></div>
+    <div id="page-wallet" class="page"></div>
+    <div id="page-history" class="page"></div>
+    <div id="page-deposit" class="page"></div>
+    <div id="page-admin" class="page"></div>
+</div>
+
+<!-- المودالات -->
+<div id="sendModal" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-handle"></div>
+        <div class="modal-title">إرسال عملة</div>
+        <div class="form-group">
+            <label class="form-label">العملة</label>
+            <select id="sendCurrency" class="form-input"></select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">المستلم (ID)</label>
+            <input type="number" id="sendToUserId" class="form-input" placeholder="مثال: 6187252111">
+        </div>
+        <div class="form-group">
+            <label class="form-label">المبلغ</label>
+            <input type="number" id="sendAmount" class="form-input" placeholder="0.00" step="any">
+        </div>
+        <div class="form-group">
+            <label class="form-label">ملاحظة</label>
+            <input type="text" id="sendNote" class="form-input" placeholder="اختياري">
+        </div>
+        <div class="modal-buttons">
+            <button class="btn btn-outline" onclick="closeModal('sendModal')">إلغاء</button>
+            <button class="btn btn-primary" onclick="sendCurrency()">إرسال</button>
+        </div>
+    </div>
+</div>
+
+<div id="createCurrencyModal" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-handle"></div>
+        <div class="modal-title">إنشاء عملة جديدة</div>
+        <div class="form-group">
+            <label class="form-label">اسم العملة</label>
+            <input type="text" id="newCurrencyName" class="form-input" placeholder="مثال: الذهب الرقمي">
+        </div>
+        <div class="form-group">
+            <label class="form-label">الرمز (3-5 أحرف)</label>
+            <input type="text" id="newCurrencySymbol" class="form-input" placeholder="مثال: GOLD" maxlength="5">
+        </div>
+        <div class="form-group">
+            <label class="form-label">الكمية الإجمالية</label>
+            <input type="number" id="newCurrencySupply" class="form-input" placeholder="1000000" step="any" value="1000000">
+        </div>
+        <div class="form-group">
+            <label class="form-label">الوصف</label>
+            <textarea id="newCurrencyDesc" class="form-input" rows="2" placeholder="وصف العملة..."></textarea>
+        </div>
+        <div class="form-group">
+            <label class="form-label">صورة العملة</label>
+            <div class="img-upload" id="currencyImageUpload">
+                <input type="file" accept="image/*" id="currencyImageInput">
+                <span>📷 اضغط لرفع صورة</span>
+            </div>
+        </div>
+        <div class="modal-buttons">
+            <button class="btn btn-outline" onclick="closeModal('createCurrencyModal')">إلغاء</button>
+            <button class="btn btn-gold" onclick="createCurrency()">إنشاء (5 GCO رسوم)</button>
+        </div>
+    </div>
+</div>
+
+<div id="addLiquidityModal" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-handle"></div>
+        <div class="modal-title">إضافة سيولة</div>
+        <div class="form-group">
+            <label class="form-label">العملة</label>
+            <select id="liquidityCurrency" class="form-input"></select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">المبلغ بـ GCO</label>
+            <input type="number" id="liquidityAmount" class="form-input" placeholder="0.00" step="any">
+        </div>
+        <div id="liquidityPreview" class="liquidity-preview"></div>
+        <div class="modal-buttons">
+            <button class="btn btn-outline" onclick="closeModal('addLiquidityModal')">إلغاء</button>
+            <button class="btn btn-primary" onclick="addLiquidity()">إضافة سيولة</button>
+        </div>
+    </div>
+</div>
+
+<div id="currencyDetailModal" class="modal-overlay">
+    <div class="modal modal-large">
+        <div class="modal-handle"></div>
+        <div id="currencyDetailContent"></div>
+        <button class="btn btn-outline" style="margin-top:16px" onclick="closeModal('currencyDetailModal')">إغلاق</button>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
